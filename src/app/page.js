@@ -1,12 +1,26 @@
-export default function Home() {
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function SplashScreen(){
+  const router = useRouter();
+
+  useEffect (() => {
+    const timer = setTimeout(() => {
+      router.push("/login");
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold text-orange-500">
-        ¡Bloom en marcha! 🐾
-      </h1>
-      <p className="mt-4 text-gray-600">
-        Próximamente el feed de mascotas perdidas y adopciones.
-      </p>
-    </main>
+    <div className="flex h-screen w-full items-center justify-center bg-[#F3F4F6]">
+      <div className="animate-pulse text-center">
+        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-[#3B82F6] text-white text-2xl font-bold shadow-lg">
+          Bloom
+        </div>
+        <h1 className="mt-4 text-xl font-semibold text-[#1F2937] tracking-wide">Bloom</h1>
+      </div>
+    </div>
   );
 }
