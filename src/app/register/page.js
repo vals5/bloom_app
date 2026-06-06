@@ -1,13 +1,51 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function RegisterPage() {
   const router = useRouter();
+  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    console.log("Registro enviado");
+    setLoading(true);
+    setErrorMsg("");
+
+    if (!email || !password || !name || !whatsapp) {
+      setErrorMsg("Por favor, completá todos los campos.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: name,
+            whatsapp: whatsapp,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      alert("¡Registro exitoso! Ya podés iniciar sesión.");
+      router.push("/login"); 
+    } catch (error) {
+      setErrorMsg(error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,13 +59,21 @@ export default function RegisterPage() {
           <h2 className="mt-4 text-2xl font-bold text-bg">Creá tu cuenta</h2>
         </div>
 
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+        {errorMsg && (
+          <div className="rounded-xl bg-red-50 p-3 text-sm text-red-600 font-semibold border border-red-200">
+            {errorMsg}
+          </div>
+        )}
+
+        <form className="mt-6 space-y-4" onSubmit={handleRegister}>
           
           <div>
             <label className="block text-sm font-bold text-bg mb-1">Nombre completo</label>
             <input 
               type="text" 
               required 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
               placeholder="Juan Pérez" 
             />
@@ -38,6 +84,8 @@ export default function RegisterPage() {
             <input 
               type="tel" 
               required 
+              value={whatsapp}
+              onChange={(e) => setWhatsapp(e.target.value)}
               className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
               placeholder="2615555555" 
             />
@@ -49,18 +97,22 @@ export default function RegisterPage() {
             <input 
               type="email" 
               required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
               placeholder="tu@correo.com" 
             />
           </div>
 
-           <div>
+          <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-sm font-bold text-bg">Contraseña</label>
             </div>
             <input 
               type="password" 
               required 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
               placeholder="••••••••" 
             />
@@ -68,14 +120,14 @@ export default function RegisterPage() {
 
           <button 
             type="submit" 
-            className="w-full rounded-xl bg-secondary py-3 text-sm font-bold text-main-text shadow-md transition hover:opacity-90 active:scale-[0.98]"
+            disabled={loading}
+            className="w-full rounded-xl bg-secondary py-3 text-sm font-bold text-main-text shadow-md transition hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
           >
-            Registrarme
+            {loading ? "Registrando..." : "Registrarme"}
           </button>
         </form>
 
-
-       <p className="text-center text-sm text-bg">
+        <p className="text-center text-sm text-bg">
           ¿Ya tenés una cuenta?{" "}
           <button 
             onClick={() => router.push("/login")} 
