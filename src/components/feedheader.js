@@ -34,7 +34,7 @@ export default function FeedHeader() {
               : "text-subt-text/70 hover:text-subt-text"
           }`}
         >
-          Perdidos y Encontrados
+          Perdidos / Encontrados
         </button>
         <button
           onClick={() => setActiveTab("adoptions")}

@@ -22,7 +22,7 @@ export default async function FeedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-bg pb-20 flex justify-center">
+    <div className="min-h-screen bg-black pb-20 flex justify-center">
       <div className="w-full max-w-md bg-bg min-h-screen flex flex-col shadow-2xl relative">
         
         <FeedHeader />

@@ -39,7 +39,6 @@ export default function RegisterPage() {
 
       if (error) throw error;
 
-      alert("¡Registro exitoso! Ya podés iniciar sesión.");
       router.push("/login"); 
     } catch (error) {
       setErrorMsg(error.message);
