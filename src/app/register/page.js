@@ -1,142 +1,123 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { MailCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
+import { authErrorMessage } from "@/lib/auth";
+import { cleanPhone, isValidLocalPhone } from "@/lib/pets";
+import AuthShell from "@/components/authshell";
+import { Alert, Button, Field } from "@/components/ui";
+import PasswordField from "@/components/passwordfield";
 
 export default function RegisterPage() {
   const router = useRouter();
-  
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [whatsapp, setWhatsapp] = useState("");
+  const [form, setForm] = useState({ name: "", whatsapp: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
-  const handleRegister = async (e) => {
+  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setErrorMsg("");
 
-    if (!email || !password || !name || !whatsapp) {
-      setErrorMsg("Por favor, completá todos los campos.");
-      setLoading(false);
+    if (!isValidLocalPhone(form.whatsapp)) {
+      setErrorMsg("El teléfono debe tener 10 dígitos: código de área sin 0 + número sin 15. Ej: 2615555555.");
+      return;
+    }
+    if (form.password.length < 6) {
+      setErrorMsg("La contraseña debe tener al menos 6 caracteres.");
       return;
     }
 
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: {
-            full_name: name,
-            whatsapp: whatsapp,
-          },
-        },
-      });
+    setLoading(true);
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email.trim(),
+      password: form.password,
+      options: { data: { full_name: form.name.trim(), whatsapp: cleanPhone(form.whatsapp) } },
+    });
+    setLoading(false);
 
-      if (error) throw error;
-
-      router.push("/login"); 
-    } catch (error) {
-      setErrorMsg(error.message);
-    } finally {
-      setLoading(false);
+    if (error) {
+      setErrorMsg(authErrorMessage(error));
+      return;
     }
+    // Con "Confirm email" activado Supabase no devuelve sesión hasta que se confirma el correo.
+    if (data.session) router.replace("/feed");
+    else setNeedsConfirmation(true);
   };
 
-  return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-bg px-4 py-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-primary p-8 shadow-xl">
-        
-        <div className="text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-white text-main text-xl font-bold shadow-md">
-            Bloom
-          </div>
-          <h2 className="mt-4 text-2xl font-bold text-bg">Creá tu cuenta</h2>
+  if (needsConfirmation) {
+    return (
+      <AuthShell title="Revisá tu correo" subtitle={`Te enviamos un enlace a ${form.email.trim()}`}>
+        <div className="space-y-5 text-center">
+          <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-found/10 text-found">
+            <MailCheck className="h-7 w-7" />
+          </span>
+          <p className="text-sm text-ink-soft">Tocá el enlace para confirmar tu cuenta y después iniciá sesión.</p>
+          <Button href="/login" className="w-full">
+            Ir a iniciar sesión
+          </Button>
         </div>
+      </AuthShell>
+    );
+  }
 
-        {errorMsg && (
-          <div className="rounded-xl bg-red-50 p-3 text-sm text-red-600 font-semibold border border-red-200">
-            {errorMsg}
-          </div>
-        )}
-
-        <form className="mt-6 space-y-4" onSubmit={handleRegister}>
-          
-          <div>
-            <label className="block text-sm font-bold text-bg mb-1">Nombre completo</label>
-            <input 
-              type="text" 
-              required 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
-              placeholder="Juan Pérez" 
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-bg mb-1">Telefóno (con código de área)</label>
-            <input 
-              type="tel" 
-              required 
-              value={whatsapp}
-              onChange={(e) => setWhatsapp(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
-              placeholder="2615555555" 
-            />
-            <span className="text-[11px] text-bg mt-1 block">Es importante para que te contacten directamente por tus reportes.</span>
-          </div>
-
-          <div>
-            <label className="block text-sm font-bold text-bg mb-1">Correo electrónico</label>
-            <input 
-              type="email" 
-              required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
-              placeholder="tu@correo.com" 
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-bold text-bg">Contraseña</label>
-            </div>
-            <input 
-              type="password" 
-              required 
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 outline-none transition focus:border-main-text focus:ring-2 focus:ring-found-color/20" 
-              placeholder="••••••••" 
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full rounded-xl bg-secondary py-3 text-sm font-bold text-main-text shadow-md transition hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
-          >
-            {loading ? "Registrando..." : "Registrarme"}
-          </button>
-        </form>
-
-        <p className="text-center text-sm text-bg">
-          ¿Ya tenés una cuenta?{" "}
-          <button 
-            onClick={() => router.push("/login")} 
-            className="font-semibold text-found-color hover:underline bg-transparent border-none cursor-pointer"
-          >
+  return (
+    <AuthShell
+      title="Creá tu cuenta"
+      subtitle="Es gratis y toma menos de un minuto."
+      footer={
+        <>
+          ¿Ya tenés cuenta?{" "}
+          <Link href="/login" className="font-bold text-primary underline-offset-2 hover:underline">
             Iniciar sesión
-          </button>
-        </p>
+          </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {errorMsg && <Alert>{errorMsg}</Alert>}
 
-      </div>
-    </div>
+        <Field label="Nombre completo" required autoComplete="name" value={form.name} onChange={set("name")} placeholder="Juan Pérez" />
+        <Field
+          label="WhatsApp"
+          type="tel"
+          required
+          autoComplete="tel-national"
+          inputMode="numeric"
+          value={form.whatsapp}
+          onChange={set("whatsapp")}
+          placeholder="2615555555"
+          hint="Código de área sin 0 y número sin 15. Es el que verán quienes quieran contactarte por tus publicaciones."
+        />
+        <Field
+          label="Correo electrónico"
+          type="email"
+          required
+          autoComplete="email"
+          inputMode="email"
+          value={form.email}
+          onChange={set("email")}
+          placeholder="tu@correo.com"
+        />
+        <PasswordField
+          label="Contraseña"
+          required
+          minLength={6}
+          autoComplete="new-password"
+          value={form.password}
+          onChange={set("password")}
+          placeholder="Mínimo 6 caracteres"
+        />
+
+        <Button type="submit" loading={loading} className="w-full">
+          {loading ? "Creando cuenta…" : "Crear cuenta"}
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

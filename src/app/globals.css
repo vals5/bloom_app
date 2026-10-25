@@ -1,23 +1,59 @@
 @import "tailwindcss";
 
-@theme {
-  --color-bg: #eddddd;
-  --color-primary: #185B63;
-  --color-secondary: #71babf;
-  --color-lost: #C0261C;
-  --color-found: #BA460D;
-  --color-adopt: #C59538;
-  --color-filter: #BA460D;
-  --color-mode: #858585;
-
-  --color-main-text: #1A1D19;
-  --color-subt-text: #262A2B;
-
-  --font-quicksand: var(--font-quicksand);    
+/* La fuente la inyecta next/font en layout.js como --font-quicksand */
+@theme inline {
+  --font-sans: var(--font-quicksand), ui-sans-serif, system-ui, sans-serif;
 }
 
-body {
-  font-family: var(--font-quicksand), sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-main-text);
+/* ─────────────────────────────────────────────────────────────
+   Paleta única de Bloom. Todo color de la app sale de acá.
+   (Contrastes WCAG verificados: texto ≥ 4.5:1 sobre su fondo)
+   ───────────────────────────────────────────────────────────── */
+@theme {
+  /* Marca */
+  --color-bg: #eddddd;
+  --color-surface: #ffffff;
+  --color-primary: #185b63;
+  --color-primary-dark: #124a51;
+  --color-secondary: #71babf;
+
+  /* Estados de una publicación */
+  --color-lost: #c0261c;
+  --color-found: #2a7040;
+  --color-adopt: #9a6b12;
+
+  /* Texto */
+  --color-ink: #1a1d19;
+  --color-ink-soft: #3f494b;
+  --color-muted: #586466;
+
+  /* Bordes y campos de formulario */
+  --color-line: #e3d2d2;
+  --color-field: #f8f3f3;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Respeta la barra de gestos de iPhone / Android */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }

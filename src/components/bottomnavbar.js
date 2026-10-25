@@ -1,40 +1,46 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
-import { Home, Search, PlusCircle, User } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { House, Plus, User } from "lucide-react";
+
+// Solo rutas que existen. (Antes había "Buscar" → /search, que daba 404: la búsqueda ahora vive en el feed.)
+const ITEMS = [
+  { href: "/feed", label: "Inicio", icon: House, also: ["/pet-details"] },
+  { href: "/create", label: "Publicar", icon: Plus, primary: true },
+  { href: "/profile", label: "Perfil", icon: User },
+];
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const navItems = [
-    { label: "Inicio", icon: Home, path: "/feed" },
-    { label: "Buscar", icon: Search, path: "/search" },
-    { label: "Crear", icon: PlusCircle, path: "/create" },
-    { label: "Perfil", icon: User, path: "/profile" },
-  ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-black pb-safe shadow-lg">
-      <div className="mx-auto flex h-16 max-w-md items-center justify-around px-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.path;
-
+    <nav aria-label="Principal" className="pb-safe sticky bottom-0 z-40 border-t border-line bg-surface md:hidden">
+      <ul className="flex h-16 items-center justify-around px-2">
+        {ITEMS.map(({ href, label, icon: Icon, primary, also = [] }) => {
+          const active = [href, ...also].some((p) => pathname === p || pathname.startsWith(`${p}/`));
           return (
-            <button
-              key={item.path}
-              onClick={() => router.push(item.path)}
-              className={`flex flex-col items-center justify-center gap-1 w-12 h-12 transition-colors ${
-                isActive ? "text-primary" : "text-mode"
-              }`}
-            >
-              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
+            <li key={href}>
+              <Link
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`flex min-w-16 flex-col items-center gap-0.5 py-1 text-[11px] font-bold transition-colors ${
+                  active ? "text-primary" : "text-muted hover:text-ink"
+                }`}
+              >
+                {primary ? (
+                  <span className="grid h-8 w-12 place-items-center rounded-full bg-primary text-white shadow-sm">
+                    <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden="true" />
+                  </span>
+                ) : (
+                  <Icon className="h-6 w-6" strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+                )}
+                {label}
+              </Link>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </nav>
   );
 }

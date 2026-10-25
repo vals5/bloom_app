@@ -1,36 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Bloom 🌸
 
-## Getting Started
+App para ayudar a mascotas perdidas, encontradas y en adopción en Mendoza.
+Next.js 16 · React 19 · Tailwind 4 · Supabase.
 
-First, run the development server:
+## Puesta en marcha
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. `npm install`
+2. Copiá `.env.example` a `.env.local` y completá las claves de Supabase.
+3. En Supabase → **SQL Editor**, ejecutá `supabase/setup.sql` (tablas, seguridad RLS y bucket de fotos). Se puede correr más de una vez.
+4. En Supabase → **Authentication → URL Configuration** agregá en *Redirect URLs*:
+   - `http://localhost:3000/reset-password`
+   - `https://TU-DOMINIO/reset-password` (y poné tu dominio como *Site URL*)
+
+   Sin esto, el enlace del correo de "Olvidé mi contraseña" no funciona.
+5. `npm run dev` → http://localhost:3000
+
+## Estructura
+
+```
+src/
+  app/            pantallas (splash, login, register, forgot-password, reset-password, feed, create, pet-details/[id], profile)
+  components/     ui.js (botones, campos, chips…), petcard, feedheader, bottomnavbar, appshell…
+  lib/            pets.js (estados, opciones, helpers), auth.js, favorites.js, photos.js, supabase.js
+supabase/setup.sql
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Tipografía
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+Quicksand viene **incluida en el proyecto** (`src/app/fonts/Quicksand-Variable.woff2`, fuente variable 300–700, licencia OFL).
+Se carga con `next/font/local` en `src/app/layout.js`: no se descarga de Google ni hace falta internet para compilar.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Reglas del proyecto
 
-## Learn More
+- **Colores**: solo los tokens de `src/app/globals.css` (`bg-primary`, `text-ink`, `bg-lost`…). Nada de hex ni `gray-*` sueltos.
+- **Estados / opciones** (perdido, razas, tamaños…): se definen una sola vez en `src/lib/pets.js`.
+- **Botones, inputs, alertas, chips**: usar los de `src/components/ui.js`.
+- Los filtros del feed viven en la URL (`?status=lost&type=perro&q=godoy`).
 
-To learn more about Next.js, take a look at the following resources:
+## Privacidad y datos
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- El **WhatsApp** vive en la tabla `profiles`, no en `pets`. Solo lo puede leer una persona con sesión iniciada
+  (y solo de quienes tienen publicaciones). Quien no inició sesión ve "Iniciá sesión para contactar".
+- Los **favoritos** se guardan en la tabla `favorites` (por cuenta), no en el dispositivo.
+- Todas las tablas tienen RLS: cada persona solo edita/borra lo suyo.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Responsive
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Celular: 1 columna + barra inferior · Tablet: 2 columnas + barra superior · Escritorio: 3 columnas.
+El ancho se define en `components/appshell.js` (`size`), y las grillas en cada pantalla (`sm:grid-cols-2 lg:grid-cols-3`).
