@@ -24,7 +24,7 @@ const BUTTON_VARIANTS = {
   outline: "border border-line bg-surface text-ink hover:bg-field",
   danger: "bg-lost text-white hover:brightness-90",
 };
-const BUTTON_SIZES = { md: "h-12 px-5 text-sm", sm: "h-10 px-4 text-xs" };
+const BUTTON_SIZES = { md: "h-12 px-5 text-sm", sm: "h-11 px-4 text-xs" };
 
 export function Button({
   variant = "primary",
@@ -55,7 +55,7 @@ export function Button({
 
 /* ───────── Campos de formulario ───────── */
 export const inputClass =
-  "w-full rounded-xl border border-line bg-field px-4 text-sm text-ink outline-none transition placeholder:text-muted/70 focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20";
+  "w-full rounded-xl border border-line bg-field px-4 text-base text-ink outline-none transition sm:text-sm placeholder:text-muted/70 focus:border-primary focus:bg-surface focus:ring-2 focus:ring-primary/20";
 
 export function FieldShell({ id, label, hint, children }) {
   return (
@@ -121,7 +121,7 @@ export function Alert({ variant = "error", children }) {
 
 /* ───────── Chip (filtro / opción seleccionable). Con `href` es un link. ───────── */
 export function Chip({ active = false, icon: Icon, href, children, className = "", ...props }) {
-  const cls = `inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-xs font-bold transition ${
+  const cls = `inline-flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-xs font-bold transition ${
     active ? "border-primary bg-primary/10 text-primary" : "border-line bg-surface text-ink-soft hover:bg-field"
   } ${className}`;
   const content = (

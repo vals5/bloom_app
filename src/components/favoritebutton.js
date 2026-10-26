@@ -21,7 +21,7 @@ export default function FavoriteButton({ id, className = "" }) {
       onClick={handleClick}
       aria-pressed={isFavorite}
       aria-label={isFavorite ? "Quitar de guardados" : "Guardar"}
-      className={`grid h-10 w-10 place-items-center rounded-full bg-surface/90 shadow-sm backdrop-blur transition active:scale-95 ${className}`}
+      className={`grid h-11 w-11 place-items-center rounded-full bg-surface/90 shadow-sm backdrop-blur transition active:scale-95 ${className}`}
     >
       <Heart className={`h-5 w-5 transition-colors ${isFavorite ? "fill-lost text-lost" : "text-ink"}`} />
     </button>

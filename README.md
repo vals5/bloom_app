@@ -25,6 +25,16 @@ src/
 supabase/setup.sql
 ```
 
+## App instalable (PWA)
+
+Bloom se puede instalar desde el navegador y abre como app (sin barra del navegador).
+
+- `src/app/manifest.js` → nombre, colores, íconos y atajos de la app.
+- `public/icons/` y `src/app/icon.png`, `apple-icon.png` → íconos (192, 512, "maskable" para Android y 180 para iPhone).
+- `public/sw.js` → service worker. Solo muestra `public/offline.html` si no hay internet; **no guarda datos**.
+- `src/lib/pwa.js` + `components/installcard.js` → botón "Instalar" en el perfil (Android/Chrome) e instrucciones para iPhone.
+- Requiere **HTTPS** en producción (Vercel y similares ya lo dan). El service worker solo se activa en producción (`npm run build && npm start`), no en `npm run dev`.
+
 ## Tipografía
 
 Quicksand viene **incluida en el proyecto** (`src/app/fonts/Quicksand-Variable.woff2`, fuente variable 300–700, licencia OFL).

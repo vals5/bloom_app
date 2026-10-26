@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Share2 } from "lucide-react";
 
 const roundBtn =
-  "grid h-10 w-10 place-items-center rounded-full bg-surface/90 shadow-sm backdrop-blur transition active:scale-95";
+  "grid h-11 w-11 place-items-center rounded-full bg-surface/90 shadow-sm backdrop-blur transition active:scale-95";
 
 /** Vuelve a la pantalla anterior (conserva filtros del feed); si no hay historial, va al feed. */
 export function BackButton({ className = "" }) {

@@ -1,5 +1,6 @@
 import "./globals.css";
 import localFont from "next/font/local";
+import PwaRegister from "@/components/pwaregister";
 
 // Quicksand incluida en el proyecto (src/app/fonts): no depende de Google Fonts ni de internet al compilar.
 // Es una fuente variable, así que un solo archivo cubre todos los pesos (300–700). Licencia OFL incluida.
@@ -15,6 +16,10 @@ const quicksand = localFont({
 export const metadata = {
   title: { default: "Bloom", template: "%s · Bloom" },
   description: "Mascotas perdidas, encontradas y en adopción en Mendoza",
+  applicationName: "Bloom",
+  // iPhone: al agregarla a inicio abre como app, con este nombre
+  appleWebApp: { capable: true, title: "Bloom", statusBarStyle: "default" },
+  formatDetection: { telephone: false }, // que iOS no convierta números en links por su cuenta
 };
 
 export const viewport = {
@@ -27,7 +32,10 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es-AR" className={quicksand.variable}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        {children}
+        <PwaRegister />
+      </body>
     </html>
   );
 }

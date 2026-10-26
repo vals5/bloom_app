@@ -23,7 +23,7 @@ export default function FeedHeader({ status, type, q }) {
   const tabs = [{ key: "all", label: "Todos" }, ...STATUS_KEYS.map((k) => ({ key: k, label: STATUS[k].tab, dot: STATUS[k].dot }))];
 
   return (
-    <header className="sticky top-0 z-30 space-y-2.5 border-b border-line bg-bg/95 px-4 pb-2.5 pt-3 backdrop-blur md:space-y-3 md:px-6 md:pb-3 md:pt-4">
+    <header className="sticky top-0 z-30 [@media(max-height:500px)]:static space-y-2.5 border-b border-line bg-bg/95 px-4 pb-2.5 pt-3 backdrop-blur md:space-y-3 md:px-6 md:pb-3 md:pt-4">
       <div className="flex items-center gap-3">
         <Link href="/feed" className="flex shrink-0 items-center gap-2 md:hidden" aria-label="Bloom, ir al inicio">
           <LogoMark />
@@ -41,11 +41,11 @@ export default function FeedHeader({ status, type, q }) {
             defaultValue={q}
             placeholder="Buscar"
             aria-label="Buscar publicaciones"
-            className="h-10 w-full rounded-full border border-line bg-surface pl-9 pr-3 text-sm text-ink outline-none placeholder:text-muted/70 focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="h-11 w-full rounded-full border border-line bg-surface pl-9 pr-3 text-base text-ink sm:text-sm outline-none placeholder:text-muted/70 focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </form>
 
-        <Link href="/profile" aria-label="Mi perfil" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-surface text-primary ring-1 ring-line md:hidden">
+        <Link href="/profile" aria-label="Mi perfil" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-surface text-primary ring-1 ring-line md:hidden">
           <User className="h-5 w-5" />
         </Link>
       </div>
@@ -61,7 +61,7 @@ export default function FeedHeader({ status, type, q }) {
               href={href(current, { status: t.key })}
               scroll={false}
               aria-current={active ? "true" : undefined}
-              className={`flex min-w-0 flex-1 basis-0 items-center justify-center gap-1 rounded-xl px-0.5 py-2.5 text-xs font-bold transition-colors max-[379px]:text-[11px] ${
+              className={`flex min-w-0 flex-1 basis-0 items-center justify-center min-h-11 gap-1 rounded-xl px-0.5 py-2.5 text-xs font-bold transition-colors max-[379px]:text-[11px] ${
                 active ? "bg-primary text-white" : "text-ink-soft hover:bg-field"
               }`}
             >

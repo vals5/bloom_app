@@ -8,6 +8,7 @@ import { useRequireUser } from "@/lib/auth";
 import { cleanPhone, isValidLocalPhone } from "@/lib/pets";
 import { removePetPhoto } from "@/lib/photos";
 import AppShell from "@/components/appshell";
+import InstallCard from "@/components/installcard";
 import PetCard from "@/components/petcard";
 import { Alert, Button, Chip, Field } from "@/components/ui";
 
@@ -143,6 +144,8 @@ export default function ProfilePage() {
             </Button>
           </div>
         )}
+
+        <InstallCard />
 
         <Button variant="outline" size="sm" onClick={handleLogout}>
           <LogOut className="h-4 w-4" aria-hidden="true" /> Cerrar sesión

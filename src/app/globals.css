@@ -40,6 +40,10 @@
     background-color: var(--color-bg);
     color: var(--color-ink);
   }
+  /* Sin el retraso de 300 ms ni el zoom por doble toque en botones y links */
+  a, button, input, select, textarea, label, summary {
+    touch-action: manipulation;
+  }
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
