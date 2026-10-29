@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import localFont from "next/font/local";
 import PwaRegister from "@/components/pwaregister";
@@ -16,7 +17,9 @@ const quicksand = localFont({
 // URL pública del sitio (para links absolutos al compartir). En Vercel se completa sola.
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
 
 export const metadata = {
   metadataBase: new URL(siteUrl),
@@ -40,6 +43,8 @@ export default function RootLayout({ children }) {
     <html lang="es-AR" className={quicksand.variable}>
       <body className="font-sans antialiased">
         {children}
+        <PwaRegister />
+        <Analytics />
         <PwaRegister />
       </body>
     </html>
