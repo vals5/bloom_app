@@ -13,7 +13,13 @@ const quicksand = localFont({
   fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
+// URL pública del sitio (para links absolutos al compartir). En Vercel se completa sola.
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
 export const metadata = {
+  metadataBase: new URL(siteUrl),
   title: { default: "Bloom", template: "%s · Bloom" },
   description: "Mascotas perdidas, encontradas y en adopción en Mendoza",
   applicationName: "Bloom",

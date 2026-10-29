@@ -1,3 +1,4 @@
+import { cache } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Check, MapPin } from "lucide-react";
@@ -9,12 +10,36 @@ import FavoriteButton from "@/components/favoritebutton";
 import { BackButton, ShareButton } from "@/components/detailactions";
 import { StatusBadge, Tag, PhotoPlaceholder, typeLabel } from "@/components/petparts";
 
+// cache(): la página y su metadata comparten UNA sola consulta a la base
+const getPet = cache(async (id) => {
+  const { data, error } = await supabase.from("pets").select("*").eq("id", id).maybeSingle();
+  return error ? null : data;
+});
+
+/* Lo que se ve al pegar el link en WhatsApp/Instagram: título, datos y la foto de la mascota */
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const pet = await getPet(id);
+  if (!pet) return { title: "Publicación no encontrada" };
+
+  const label = statusMeta(pet.status)?.label ?? "Mascota";
+  const title = `${label}: ${pet.name}`;
+  const description = `${[typeLabel(pet.type), pet.breed, pet.gender, pet.size].filter(Boolean).join(" · ")} — ${pet.location}`;
+  return {
+    title,
+    description,
+    // sin foto → la imagen de la marca, para que el link siempre se vea bien al compartirlo
+    openGraph: { title, description, type: "article", images: [{ url: pet.image_url ?? "/opengraph-image.png" }] },
+    twitter: { card: "summary_large_image", title, description, images: [pet.image_url ?? "/opengraph-image.png"] },
+  };
+}
+
 export default async function PetDetailsPage({ params }) {
   const { id } = await params;
-  const { data: pet, error } = await supabase.from("pets").select("*").eq("id", id).maybeSingle();
+  const pet = await getPet(id);
 
   // id inválido o publicación borrada → 404 amable
-  if (error || !pet) notFound();
+  if (!pet) notFound();
 
   const meta = statusMeta(pet.status);
   const traits = TRAITS.filter((t) => pet[t.id]);

@@ -14,12 +14,23 @@ try {
   // URL inválida: lib/supabase.js ya avisa con un error claro
 }
 
+// Cabeceras de seguridad para todas las páginas. (No se incluye CSP todavía: ver DEPLOY.md, "Más adelante".)
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" }, // que nadie pueda incrustar Bloom en otro sitio (clickjacking)
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "microphone=(), geolocation=(), payment=()" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000" },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  poweredByHeader: false,
   images: { remotePatterns },
   async headers() {
     return [
+      { source: "/(.*)", headers: securityHeaders },
       {
         source: "/sw.js",
         headers: [

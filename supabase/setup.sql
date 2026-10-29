@@ -1,8 +1,59 @@
 -- ════════════════════════════════════════════════════════════════
--- Bloom · preparación de Supabase  (v2)
+-- Bloom · preparación de Supabase  (v4)
 -- Pegalo en Dashboard → SQL Editor → Run.
 -- Es idempotente: se puede correr más de una vez (también si ya corriste la v1).
 -- ════════════════════════════════════════════════════════════════
+
+-- 0) Tabla pets: se crea si no existe y se completan TODAS las columnas que usa la app ------
+-- (sirve aunque tu tabla la hayas armado a mano con menos columnas: no borra nada de lo que ya tenés)
+create table if not exists public.pets (
+  id         uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now()
+);
+
+alter table public.pets add column if not exists created_at     timestamptz not null default now();
+alter table public.pets add column if not exists name           text;
+alter table public.pets add column if not exists status         text;
+alter table public.pets add column if not exists type           text;
+alter table public.pets add column if not exists breed          text;
+alter table public.pets add column if not exists age            text;
+alter table public.pets add column if not exists gender         text;
+alter table public.pets add column if not exists size           text;
+alter table public.pets add column if not exists location       text;
+alter table public.pets add column if not exists image_url      text;
+alter table public.pets add column if not exists date           text;   -- columna vieja: la app ahora usa created_at
+alter table public.pets add column if not exists vaccinated     boolean not null default false;
+alter table public.pets add column if not exists neutered       boolean not null default false;
+alter table public.pets add column if not exists good_with_kids boolean not null default false;
+alter table public.pets add column if not exists house_trained  boolean not null default false;
+
+-- Si una columna vieja era obligatoria (NOT NULL) y la app no la completa, publicar fallaría.
+-- Las volvemos opcionales (la clave primaria y las que tienen valor por defecto no se tocan).
+do $$
+declare c record;
+begin
+  for c in
+    select a.attname
+    from pg_attribute a
+    left join pg_index i on i.indrelid = a.attrelid and i.indisprimary and a.attnum = any (i.indkey)
+    where a.attrelid = 'public.pets'::regclass
+      and a.attnum > 0 and not a.attisdropped
+      and a.attnotnull and not a.atthasdef
+      and a.attidentity = '' and a.attgenerated = ''
+      and i.indrelid is null
+  loop
+    execute format('alter table public.pets alter column %I drop not null', c.attname);
+  end loop;
+
+  -- si el id es uuid y no tenía valor automático, se lo ponemos
+  if exists (
+    select 1 from pg_attribute
+    where attrelid = 'public.pets'::regclass and attname = 'id'
+      and not atthasdef and attidentity = '' and atttypid = 'uuid'::regtype
+  ) then
+    alter table public.pets alter column id set default gen_random_uuid();
+  end if;
+end $$;
 
 -- 1) pets: columnas que usa la app -----------------------------------
 alter table public.pets add column if not exists user_id uuid references auth.users (id) on delete cascade;
@@ -151,3 +202,43 @@ drop policy if exists "pet_photos_delete_own" on storage.objects;
 create policy "pet_photos_delete_own" on storage.objects
   for delete to authenticated
   using (bucket_id = 'pet-photos' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- 6) Validaciones y antiabuso: para que cualquiera pueda registrarse sin ensuciar la base ----
+-- "not valid" = se exige a partir de ahora; no toca ni rompe las filas que ya tenías.
+alter table public.pets drop constraint if exists pets_status_check;
+alter table public.pets add constraint pets_status_check
+  check (status in ('lost', 'found', 'adoption', 'adopt')) not valid;
+
+alter table public.pets drop constraint if exists pets_type_check;
+alter table public.pets add constraint pets_type_check
+  check (type in ('perro', 'gato')) not valid;
+
+alter table public.pets drop constraint if exists pets_text_len_check;
+alter table public.pets add constraint pets_text_len_check
+  check (char_length(name) <= 60 and char_length(location) <= 120 and char_length(coalesce(description, '')) <= 400) not valid;
+
+alter table public.profiles drop constraint if exists profiles_text_len_check;
+alter table public.profiles add constraint profiles_text_len_check
+  check (char_length(coalesce(full_name, '')) <= 80 and char_length(coalesce(whatsapp, '')) <= 20) not valid;
+
+-- Tope: máximo 10 publicaciones por persona cada 24 horas (cambiá el 10 si querés otro número)
+create or replace function private.limit_pets_per_day()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if (select count(*) from public.pets
+      where user_id = new.user_id and created_at > now() - interval '24 hours') >= 10 then
+    raise exception 'daily_limit';
+  end if;
+  return new;
+end;
+$$;
+revoke all on function private.limit_pets_per_day() from public, anon, authenticated;
+
+drop trigger if exists pets_daily_limit on public.pets;
+create trigger pets_daily_limit
+  before insert on public.pets
+  for each row execute function private.limit_pets_per_day();

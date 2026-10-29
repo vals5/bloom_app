@@ -36,6 +36,12 @@ export function useRequireUser() {
   return session;
 }
 
+/** Lee ?next=/ruta de la URL, aceptando solo rutas internas (evita redirecciones a sitios externos). */
+export function getSafeNext() {
+  const next = new URLSearchParams(window.location.search).get("next");
+  return next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : null;
+}
+
 /** Traduce los errores de Supabase Auth a mensajes claros para la persona. */
 export function authErrorMessage(error) {
   const msg = (error?.message ?? "").toLowerCase();

@@ -1,20 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { authErrorMessage } from "@/lib/auth";
+import { authErrorMessage, getSafeNext, useSession } from "@/lib/auth";
 import AuthShell from "@/components/authshell";
-import { Alert, Button, Field } from "@/components/ui";
+import { Alert, Button, Field, LogoMark } from "@/components/ui";
 import PasswordField from "@/components/passwordfield";
 
+/* Esta es la PRIMERA pantalla de la app: la ruta "/" muestra este mismo componente. */
 export default function LoginPage() {
   const router = useRouter();
+  const { user, ready } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Si ya hay una sesión abierta (por ejemplo al abrir la app instalada), no pedimos el login de nuevo
+  useEffect(() => {
+    if (ready && user) router.replace(getSafeNext() ?? "/feed");
+  }, [ready, user, router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,22 +35,34 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
-    // Si venía de una página que pedía iniciar sesión (?next=/pet-details/…), vuelve ahí. Solo rutas internas.
-    const next = new URLSearchParams(window.location.search).get("next");
-    router.replace(next && next.startsWith("/") && !next.startsWith("//") && !next.includes("\\") ? next : "/feed");
+    // Si venía de una página que pedía iniciar sesión (?next=/pet-details/…), vuelve ahí
+    router.replace(getSafeNext() ?? "/feed");
   };
+
+  if (ready && user) {
+    return (
+      <main className="grid min-h-dvh place-items-center">
+        <span className="motion-safe:animate-pulse">
+          <LogoMark size="lg" />
+        </span>
+      </main>
+    );
+  }
 
   return (
     <AuthShell
       title="Te damos la bienvenida"
       subtitle="Ingresá para publicar y contactar a otras personas."
       footer={
-        <>
-          ¿No tenés cuenta?{" "}
-          <Link href="/register" className="font-bold text-primary underline-offset-2 hover:underline">
+        <div className="space-y-3">
+          <p>¿Primera vez en Bloom?</p>
+          <Button href="/register" variant="outline" className="w-full">
             Crear cuenta
+          </Button>
+          <Link href="/feed" className="inline-block py-2 text-xs font-bold text-ink-soft underline-offset-2 hover:underline">
+            Ver publicaciones sin cuenta
           </Link>
-        </>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">

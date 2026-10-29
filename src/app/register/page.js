@@ -92,7 +92,7 @@ export default function RegisterPage() {
           value={form.whatsapp}
           onChange={set("whatsapp")}
           placeholder="2615555555"
-          hint="Código de área sin 0 y número sin 15. Es el que verán quienes quieran contactarte por tus publicaciones."
+          hint="Código de área sin 0 y número sin 15. Lo verán las personas con cuenta que quieran contactarte por tus publicaciones."
         />
         <Field
           label="Correo electrónico"

@@ -98,8 +98,6 @@ export default function CreatePage() {
           // los rasgos solo aplican a adopciones
           ...Object.fromEntries(TRAITS.map((t) => [t.id, isAdoption && form[t.id]])),
           image_url: photoUrl,
-          // columna de texto heredada: el feed ya usa created_at, pero la dejamos completa por compatibilidad
-          date: new Intl.DateTimeFormat("es-AR", { day: "numeric", month: "short" }).format(new Date()),
         })
         .select("id")
         .single();
@@ -109,7 +107,11 @@ export default function CreatePage() {
     } catch (err) {
       if (photoUrl) removePetPhoto(photoUrl); // no dejar fotos huérfanas
       console.error("Error al publicar:", err);
-      setError("No pudimos publicar. Revisá tu conexión y probá de nuevo.");
+      setError(
+        err?.message === "daily_limit"
+          ? "Llegaste al máximo de 10 publicaciones por día. Probá de nuevo mañana."
+          : "No pudimos publicar. Revisá tu conexión y probá de nuevo."
+      );
       setLoading(false);
     }
   };

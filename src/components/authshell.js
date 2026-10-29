@@ -12,7 +12,7 @@ export default function AuthShell({ title, subtitle, footer, children }) {
 
       <div className="rounded-3xl bg-surface p-6 shadow-sm ring-1 ring-line">{children}</div>
 
-      <p className="mt-6 text-center text-sm text-ink-soft">{footer}</p>
+      {footer && <div className="mt-6 text-center text-sm text-ink-soft">{footer}</div>}
     </main>
   );
 }
