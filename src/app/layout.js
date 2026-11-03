@@ -3,8 +3,6 @@ import "./globals.css";
 import localFont from "next/font/local";
 import PwaRegister from "@/components/pwaregister";
 
-// Quicksand incluida en el proyecto (src/app/fonts): no depende de Google Fonts ni de internet al compilar.
-// Es una fuente variable, así que un solo archivo cubre todos los pesos (300–700). Licencia OFL incluida.
 const quicksand = localFont({
   src: "./fonts/Quicksand-Variable.woff2",
   weight: "300 700",
@@ -14,7 +12,6 @@ const quicksand = localFont({
   fallback: ["ui-sans-serif", "system-ui", "sans-serif"],
 });
 
-// URL pública del sitio (para links absolutos al compartir). En Vercel se completa sola.
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -26,9 +23,8 @@ export const metadata = {
   title: { default: "Bloom", template: "%s · Bloom" },
   description: "Mascotas perdidas, encontradas y en adopción en Mendoza",
   applicationName: "Bloom",
-  // iPhone: al agregarla a inicio abre como app, con este nombre
   appleWebApp: { capable: true, title: "Bloom", statusBarStyle: "default" },
-  formatDetection: { telephone: false }, // que iOS no convierta números en links por su cuenta
+  formatDetection: { telephone: false },
 };
 
 export const viewport = {
